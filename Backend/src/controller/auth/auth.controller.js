@@ -7,6 +7,7 @@ import {
   createRefreshToken,
   verifyRefreshToken,
 } from "../../utils/auth.utils.js";
+import crypto from "crypto";
 
 function appUrl() {
   return config.appUrl || `http://localhost:${config.BACKEND_PORT}`;
@@ -64,10 +65,12 @@ export const registerController = async (req, res) => {
     if (!sendMailResponse.success) {
       console.error(
         "Failed to send verification email",
-        sendMailResponse.error,
+        sendMailResponse.info.response,
       );
+
       return res.status(500).json({
         message: "User registered but failed to send verification email",
+        mailResponse: sendMailResponse.info.response,
       });
     }
 
@@ -75,6 +78,7 @@ export const registerController = async (req, res) => {
       message:
         "User registered successfully. Please check your email to verify your account.",
       newlyCreatedUser,
+      mailResponse: sendMailResponse.info.response,
     });
   } catch (error) {
     console.error("Error in registerHandler:", error);
@@ -188,7 +192,7 @@ export const loginController = async (req, res) => {
 
 export const refreshTokenController = async (req, res) => {
   try {
-    const refreshToken = req.cookie?.refreshToken;
+    const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken)
       return res.status(404).json({ message: "Refresh token missing" });
@@ -202,7 +206,7 @@ export const refreshTokenController = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user.tokenVersion !== decoded.tokenVersion)
+    if (user.tokenVersion !== decoded.tokenVersion)
       return res.status(401).json({ message: "Invalid refresh token" });
 
     const newAccessToken = createAccessToken(
@@ -221,7 +225,7 @@ export const refreshTokenController = async (req, res) => {
       httpOnly: true,
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Tokens refreshed successfully!",
       accessToken: newAccessToken,
       user,
@@ -236,5 +240,116 @@ export const refreshTokenController = async (req, res) => {
 };
 
 export const logoutController = async (req, res) => {
-  
-}
+  try {
+    res.clearCookie("refreshToken", { path: "/" });
+
+    res.status(200).json({ message: "Logout succesful" });
+  } catch (error) {
+    console.log("Logout failed: ", error);
+    res.status(500).json({ message: "Logout failed: ", error: error.message });
+  }
+};
+
+export const forgotPasswordController = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    if (!email) return res.status(400).json({ message: "email is required" });
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await userModel.findOne({ email: normalizedEmail });
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
+
+    user.resetPasswordToken = tokenHash;
+    user.resetPasswordExpires = new Date(Date.now() + 1000 * 60 * 15); // 15 mins
+
+    await user.save();
+
+    const resetUrl = `${appUrl()}/api/auth/reset-password?token=${rawToken}`;
+
+    const sendMailResponse = await sendMailHandler({
+      to: user.email,
+      subject: "Reset password your password",
+      text: "",
+      html: `<p>Hi ${user.fullName},</p>
+      <p>Please click the link below to reset your password:</p>
+      <a href="${resetUrl}">reset password</a>
+      <p>If you did not request for a password reset, please ignore this email.</p>
+      <p>Best regards,<br/>The Ecoms Team</p>`,
+    });
+
+    if (!sendMailResponse.success) {
+      console.error(
+        "Failed to send reset password email",
+        sendMailResponse.info.response,
+      );
+
+      return res.status(500).json({
+        message: "User registered but failed to send verification email",
+        mailResponse: sendMailResponse.info.response,
+      });
+    }
+
+    return res.status(201).json({
+      message:
+        "User reset password mail send succesfull. Please check your email to reset your password.",
+      mailResponse: sendMailResponse.info.response,
+    });
+  } catch (error) {
+    console.log("Forgot password failed: ", error);
+
+    return res
+      .status(500)
+      .json({ message: "Forgot password failed: ", error: error.message });
+  }
+};
+
+export const resetPasswordController = async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token) return res.status(400).json({ message: "token is missing" });
+
+  if (!password || password.length < 6)
+    return res
+      .status(400)
+      .json({ message: "Password must be atleast 6 character long" });
+
+  try {
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await userModel.findOne({
+      resetPasswordToken: tokenHash,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user)
+      return res
+        .status(404)
+        .json({ message: "Reset token expired or User not found" });
+
+    user.passwordHash = password;
+
+    user.resetPasswordExpires = undefined;
+    user.resetPasswordToken = undefined;
+
+    user.tokenVersion = user.tokenVersion + 1;
+
+    await user.save();
+
+    return res.status(200).json({ message: "Password reset succesfull!" });
+  } catch (error) {
+    console.log("Reset password failed: ", error);
+    return res
+      .status(500)
+      .json({ message: "Reset password failed: ", error: error.message });
+  }
+};
