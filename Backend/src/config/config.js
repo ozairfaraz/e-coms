@@ -17,4 +17,5 @@ export const config = {
   GOOGLE_REFRESH_TOKEN: requireEnv("GOOGLE_REFRESH_TOKEN"),
   GOOGLE_USER: requireEnv("GOOGLE_USER"),
   JWT_SECRET: requireEnv("JWT_SECRET"),
+  BASE_URL: requireEnv("BASE_URL")
 };

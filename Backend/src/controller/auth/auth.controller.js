@@ -8,9 +8,22 @@ import {
   verifyRefreshToken,
 } from "../../utils/auth.utils.js";
 import crypto from "crypto";
+import { OAuth2Client } from "google-auth-library";
 
 function appUrl() {
   return config.appUrl || `http://localhost:${config.BACKEND_PORT}`;
+}
+
+function getGoogleClient() {
+  const clientId = config.GOOGLE_CLIENT_ID;
+  const clientSecret = config.GOOGLE_CLIENT_SECRET;
+  const redirectUri = `${config.BASE_URL}:${config.BACKEND_PORT}/api/auth/google/callback`;
+
+  return new OAuth2Client({
+    clientId,
+    clientSecret,
+    redirectUri,
+  });
 }
 
 export const registerController = async (req, res) => {
@@ -351,5 +364,111 @@ export const resetPasswordController = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Reset password failed: ", error: error.message });
+  }
+};
+
+export const googleAuthStartController = async (req, res) => {
+  try {
+    const client = getGoogleClient();
+
+    const url = client.generateAuthUrl({
+      access_type: "offline",
+      prompt: "consent",
+      scope: ["openid", "email", "profile"],
+    });
+
+    return res.redirect(url);
+  } catch (error) {
+    console.log("Oauth authentication failed:", error);
+    res
+      .status(500)
+      .json({ message: "Oauth authentication failed", error: error.message });
+  }
+};
+
+export const googleAuthCallbackController = async (req, res) => {
+  const code = req.query.code;
+
+  if (!code)
+    return res
+      .status(400)
+      .json({ message: "code not found in google callback" });
+
+  try {
+    const client = getGoogleClient();
+
+    const { tokens } = await client.getToken(code);
+
+    if (!tokens.id_token)
+      return res
+        .status(400)
+        .json({ message: "No id_token is present in google callback code" });
+
+    // verify id token and read the users info from it
+    const ticket = await client.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: config.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const email = payload?.email;
+    const emailVerified = payload?.email_verified;
+
+    if (!email || !emailVerified)
+      return res.status(400).json({ message: "google email is not verified" });
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    let user = await userModel.findOne({ email: normalizedEmail });
+
+    if (!user) {
+      const randomPassword = crypto.randomBytes(16).toString("hex");
+      const passwordHash = crypto
+        .createHash("sha256")
+        .update(randomPassword)
+        .digest("hex");
+
+      user = await userModel.create({
+        fullName: payload.name,
+        email: normalizedEmail,
+        isEmailVerified: true,
+        passwordHash,
+        provider: "google",
+      });
+    } else {
+      if (!user.isEmailVerified) {
+        user.isEmailVerified = true;
+        user.provider = "google";
+        await user.save();
+      }
+    }
+
+    const accessToken = createAccessToken(
+      user._id,
+      user.role,
+      user.tokenVersion,
+    );
+
+    const refreshToken = createRefreshToken(user._id, user.tokenVersion);
+
+    const isProd = config.NODE_ENV === "production";
+
+    res.cookie("refreshToken", refreshToken, {
+      secure: isProd,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+      httpOnly: true,
+    });
+
+    return res.status(200).json({
+      message: "Google log in successfully!",
+      accessToken,
+      user,
+    });
+  } catch (error) {
+    console.log("Oauth authentication failed:", error);
+    return res
+      .status(500)
+      .json({ message: "Oauth authentication failed", error: error.message });
   }
 };
