@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
     email:                { type: String, required: true, unique: true, trim: true, lowercase: true },
     passwordHash:         { type: String, required: true, select: false },
     isEmailVerified:      { type: Boolean, default: false },
-    provider:             { type: String, enum: ["local", "google"], default: "local" },
+    providers:            { type: [String], enum: ["local", "google"], default: [] },
     role:                 { type: String, enum: ["user", "admin", "vendor"], default: "user" },
     twoFactorEnabled:     { type: Boolean, default: false },
     twoFactorSecret:      { type: String, select: false, default: undefined },

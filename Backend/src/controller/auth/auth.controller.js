@@ -9,6 +9,7 @@ import {
 } from "../../utils/auth.utils.js";
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
+import bcrypt from "bcryptjs";
 
 function appUrl() {
   return config.appUrl || `http://localhost:${config.BACKEND_PORT}`;
@@ -52,6 +53,7 @@ export const registerController = async (req, res) => {
       email: normalizedEmail,
       passwordHash: password,
       fullName,
+      providers: ["local"],
     });
 
     // email verification logic
@@ -76,6 +78,7 @@ export const registerController = async (req, res) => {
     });
 
     if (!sendMailResponse.success) {
+      await userModel.findByIdAndDelete(newlyCreatedUser._id);
       console.error(
         "Failed to send verification email",
         sendMailResponse.info.response,
@@ -90,11 +93,18 @@ export const registerController = async (req, res) => {
     return res.status(201).json({
       message:
         "User registered successfully. Please check your email to verify your account.",
-      newlyCreatedUser,
       mailResponse: sendMailResponse.info.response,
     });
   } catch (error) {
     console.error("Error in registerHandler:", error);
+    if (error.name === "TokenExpiredError") {
+      return res
+        .status(400)
+        .json({ message: "Verification token has expired" });
+    }
+    if (error.name === "JsonWebTokenError") {
+      return res.status(400).json({ message: "Invalid verification token" });
+    }
 
     return res.status(500).json({
       message: "An error occurred while registering the user",
@@ -130,18 +140,22 @@ export const verifyEmailController = async (req, res) => {
     if (user.isEmailVerified)
       return res.status(400).json({ message: "User is already verified" });
 
-    const updatedUser = await userModel.findByIdAndUpdate(
-      userId,
-      { isEmailVerified: true },
-      { new: true },
-    );
+    user.isEmailVerified = true;
+    await user.save();
 
     return res.status(200).json({
       message: "Email verified successfully",
-      user: updatedUser,
     });
   } catch (error) {
     console.error("Error in verification of email: ", error);
+    if (error.name === "TokenExpiredError") {
+      return res
+        .status(400)
+        .json({ message: "Verification token has expired" });
+    }
+    if (error.name === "JsonWebTokenError") {
+      return res.status(400).json({ message: "Invalid verification token" });
+    }
 
     return res.status(500).json({
       message: "An error occurred while verifying the email",
@@ -168,6 +182,11 @@ export const loginController = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "user not found" });
 
+    if (!user.isEmailVerified)
+      return res
+        .status(403)
+        .json({ message: "Please verify your email before logging in" });
+
     const isMatch = await user.comparePassword(password);
 
     if (!isMatch)
@@ -187,15 +206,24 @@ export const loginController = async (req, res) => {
       secure: isProd,
       maxAge: 1000 * 60 * 60 * 24 * 7,
       httpOnly: true,
+      sameSite: "strict",
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "User logged in successfully!",
       accessToken,
       user,
     });
   } catch (error) {
     console.error("Error in logging in: ", error);
+    if (error.name === "TokenExpiredError") {
+      return res
+        .status(400)
+        .json({ message: "Verification token has expired" });
+    }
+    if (error.name === "JsonWebTokenError") {
+      return res.status(400).json({ message: "Invalid verification token" });
+    }
     return res.status(500).json({
       message: "An error occurred while logging in: ",
       error: error.message,
@@ -236,15 +264,23 @@ export const refreshTokenController = async (req, res) => {
       secure: isProd,
       maxAge: 1000 * 60 * 60 * 24 * 7,
       httpOnly: true,
+      sameSite: "strict",
     });
 
     return res.status(200).json({
       message: "Tokens refreshed successfully!",
       accessToken: newAccessToken,
-      user,
     });
   } catch (error) {
     console.error("Error in logging in: ", error);
+        if (error.name === "TokenExpiredError") {
+      return res
+        .status(400)
+        .json({ message: "Verification token has expired" });
+    }
+    if (error.name === "JsonWebTokenError") {
+      return res.status(400).json({ message: "Invalid verification token" });
+    }
     return res.status(500).json({
       message: "An error occurred while refreshing tokens: ",
       error: error.message,
@@ -380,7 +416,7 @@ export const googleAuthStartController = async (req, res) => {
     return res.redirect(url);
   } catch (error) {
     console.log("Oauth authentication failed:", error);
-    res
+    return res
       .status(500)
       .json({ message: "Oauth authentication failed", error: error.message });
   }
@@ -423,25 +459,26 @@ export const googleAuthCallbackController = async (req, res) => {
     let user = await userModel.findOne({ email: normalizedEmail });
 
     if (!user) {
-      const randomPassword = crypto.randomBytes(16).toString("hex");
-      const passwordHash = crypto
-        .createHash("sha256")
-        .update(randomPassword)
-        .digest("hex");
+      const passwordHash = crypto.randomBytes(16).toString("hex");
 
       user = await userModel.create({
         fullName: payload.name,
         email: normalizedEmail,
         isEmailVerified: true,
         passwordHash,
-        provider: "google",
+        providers: ["google"],
       });
     } else {
+      let changed = false;
       if (!user.isEmailVerified) {
         user.isEmailVerified = true;
-        user.provider = "google";
-        await user.save();
+        changed = true;
       }
+      if (!user.providers.includes("google")) {
+        user.providers.push("google");
+        changed = true;
+      }
+      if (changed) await user.save();
     }
 
     const accessToken = createAccessToken(
@@ -457,6 +494,7 @@ export const googleAuthCallbackController = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       secure: isProd,
       maxAge: 1000 * 60 * 60 * 24 * 7,
+      sameSite: "strict",
       httpOnly: true,
     });
 
