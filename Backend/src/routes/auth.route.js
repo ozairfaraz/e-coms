@@ -7,6 +7,7 @@ import {
   logoutController,
   refreshTokenController,
   registerController,
+  resendVerificationEmailController,
   resetPasswordController,
   verifyEmailController,
 } from "../controller/auth/auth.controller.js";
@@ -15,6 +16,7 @@ const authRouter = Router();
 
 authRouter.post("/register", registerController);
 authRouter.get("/verify-email", verifyEmailController);
+authRouter.post("/resend-verification", resendVerificationEmailController);
 authRouter.post("/login", loginController);
 authRouter.post("/logout", logoutController);
 authRouter.post("/refresh", refreshTokenController);

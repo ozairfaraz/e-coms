@@ -12,7 +12,7 @@ import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcryptjs";
 
 function appUrl() {
-  return config.appUrl || `http://localhost:${config.BACKEND_PORT}`;
+  return config.appUrl || `${config.BASE_URL}:${config.FRONTEND_PORT}`;
 }
 
 function getGoogleClient() {
@@ -64,7 +64,7 @@ export const registerController = async (req, res) => {
       { expiresIn: "1d" },
     );
 
-    const verificationLink = `${appUrl()}/api/auth/verify-email?token=${verificationToken}`;
+    const verificationLink = `${appUrl()}/verify-email?token=${verificationToken}`;
 
     const sendMailResponse = await sendMailHandler({
       to: email,
@@ -159,6 +159,77 @@ export const verifyEmailController = async (req, res) => {
 
     return res.status(500).json({
       message: "An error occurred while verifying the email",
+      error: error.message,
+    });
+  }
+};
+
+export const resendVerificationEmailController = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    if (!email) {
+      return res.status(400).json({
+        message: "Email is required",
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await userModel.findOne({ email: normalizedEmail });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User with this email not found",
+      });
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        message: "This email is already verified",
+      });
+    }
+
+    // Generate new verification token
+    const verificationToken = jwt.sign({ sub: user._id }, config.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
+    const verificationLink = `${appUrl()}/verify-email?token=${verificationToken}`;
+
+    // Send verification email
+    const sendMailResponse = await sendMailHandler({
+      to: email,
+      subject: "Verify Your Email - Ecoms",
+      text: "",
+      html: `<p>Hi ${user.fullName},</p>
+      <p>Please click the link below to verify your email address:</p>
+      <a href="${verificationLink}">Verify Email</a>
+      <p>This link will expire in 24 hours.</p>
+      <p>If you did not request this email, please ignore it.</p>
+      <p>Best regards,<br/>The Ecoms Team</p>`,
+    });
+
+    if (!sendMailResponse.success) {
+      console.error(
+        "Failed to send verification email",
+        sendMailResponse.info.response,
+      );
+
+      return res.status(500).json({
+        message: "Failed to send verification email",
+        mailResponse: sendMailResponse.info.response,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Verification email sent successfully",
+      mailResponse: sendMailResponse.info.response,
+    });
+  } catch (error) {
+    console.error("Error in resendVerificationEmail:", error);
+    return res.status(500).json({
+      message: "An error occurred while resending verification email",
       error: error.message,
     });
   }
@@ -273,7 +344,7 @@ export const refreshTokenController = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in logging in: ", error);
-        if (error.name === "TokenExpiredError") {
+    if (error.name === "TokenExpiredError") {
       return res
         .status(400)
         .json({ message: "Verification token has expired" });
