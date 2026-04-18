@@ -564,16 +564,19 @@ export const googleAuthCallbackController = async (req, res) => {
 
     res.cookie("refreshToken", refreshToken, {
       secure: isProd,
-      maxAge: 1000 * 60 * 60 * 24 * 7,
+      maxAge: 1000 * 60 * 60 * 24 * 7, // long-lived (7 days)
       sameSite: "strict",
       httpOnly: true,
     });
 
-    return res.status(200).json({
-      message: "Google log in successfully!",
-      accessToken,
-      user,
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: "strict",
+      maxAge: 1000 * 60 * 15, // short-lived (15 min)
     });
+
+    return res.redirect(`${config.BASE_URL}:${config.FRONTEND_PORT}`)
   } catch (error) {
     console.log("Oauth authentication failed:", error);
     return res

@@ -1,6 +1,7 @@
 import { setUser, setError, setLoading } from "../state/auth.slice";
 import { register, login } from "../services/auth.api";
 import { useDispatch } from "react-redux";
+import { config } from "../../../config/config";
 
 export function useAuth() {
   const dispatch = useDispatch();
@@ -17,5 +18,10 @@ export function useAuth() {
     dispatch(setUser(data.user));
   }
 
-  return { handleRegister, handleLogin };
+  async function handleStartGoogleAuth (){
+    const googleAuthStartUrl = `${config.BASE_URL}:${config.BACKEND_PORT}/api/auth/google`
+    window.location.href = googleAuthStartUrl;
+  }
+
+  return { handleRegister, handleLogin, handleStartGoogleAuth };
 }

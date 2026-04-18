@@ -4,8 +4,8 @@ import AuthLayout from "../components/AuthLayout";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Login() {
-  const { handleLogin } = useAuth();
-  const navigate = useNavigate()
+  const { handleLogin,handleStartGoogleAuth } = useAuth();
+  const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -22,8 +22,8 @@ export default function Login() {
       password: formData.password,
     });
     console.log("Login payload:", formData);
-    console.log("logged in broskiiii")
-    navigate("/")
+    console.log("logged in broskiiii");
+    navigate("/");
   };
 
   const inputClass = (name) =>
@@ -47,19 +47,19 @@ export default function Login() {
       subheading="Log in to discover exclusive drops, track your orders, and unlock member-only deals."
     >
       {/* Header */}
-      <div className="mb-8">
-        <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border border-[#F7931A]/30 bg-[#F7931A]/8">
+      <div className="mb-4">
+        <div className="inline-flex items-center gap-2 mb-2 px-3 py-1 rounded-full border border-[#F7931A]/30 bg-[#F7931A]/8">
           <span className="w-1.5 h-1.5 rounded-full bg-[#F7931A] animate-pulse-glow" />
           <span className="font-mono text-xs text-[#F7931A] tracking-widest uppercase">
             Welcome Back
           </span>
         </div>
-        <h1 className="font-heading font-bold text-3xl text-white mb-2 leading-tight">
+        <h1 className="font-heading font-bold text-2xl text-white mb-1 leading-tight">
           Sign in to your
           <br />
           <span className="text-gradient">account</span>
         </h1>
-        <p className="text-[#94A3B8] text-sm">
+        <p className="text-[#94A3B8] text-xs">
           Don&apos;t have an account?{" "}
           <Link
             to="/register"
@@ -74,14 +74,14 @@ export default function Login() {
       <form
         id="login-form"
         onSubmit={handleSubmit}
-        className="bg-[#0F1115] border border-white/[0.08] rounded-2xl p-8 shadow-[0_0_50px_-15px_rgba(247,147,26,0.1)]"
+        className="bg-[#0F1115] border border-white/[0.08] rounded-2xl p-5 shadow-[0_0_50px_-15px_rgba(247,147,26,0.1)]"
         noValidate
       >
         {/* Email */}
-        <div className="mb-5">
+        <div className="mb-3">
           <label
             htmlFor="login-email"
-            className="block font-mono text-xs text-[#94A3B8] uppercase tracking-widest mb-2"
+            className="block font-mono text-xs text-[#94A3B8] uppercase tracking-widest mb-1"
           >
             Email Address
           </label>
@@ -119,10 +119,10 @@ export default function Login() {
         </div>
 
         {/* Password */}
-        <div className="mb-2">
+        <div className="mb-1">
           <label
             htmlFor="login-password"
-            className="block font-mono text-xs text-[#94A3B8] uppercase tracking-widest mb-2"
+            className="block font-mono text-xs text-[#94A3B8] uppercase tracking-widest mb-1"
           >
             Password
           </label>
@@ -200,7 +200,7 @@ export default function Login() {
         </div>
 
         {/* Forgot link */}
-        <div className="flex justify-end mb-6">
+        <div className="flex justify-end mb-3">
           <Link
             to="/forgot-password"
             className="text-xs font-mono text-[#94A3B8] hover:text-[#F7931A] transition-colors duration-200 tracking-wide"
@@ -213,7 +213,7 @@ export default function Login() {
         <button
           id="login-submit"
           type="submit"
-          className="w-full h-12 rounded-full font-body font-semibold text-sm text-white tracking-wider uppercase
+          className="w-full h-10 rounded-full font-body font-semibold text-xs text-white tracking-wider uppercase
                      bg-gradient-to-r from-[#EA580C] to-[#F7931A]
                      shadow-[0_0_20px_-5px_rgba(234,88,12,0.5)]
                      hover:shadow-[0_0_30px_-5px_rgba(247,147,26,0.7)]
@@ -224,40 +224,60 @@ export default function Login() {
         </button>
 
         {/* Divider */}
-        <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-white/8" />
-          <span className="font-mono text-xs text-white/30 tracking-widest uppercase">
-            or
+        <div className="my-2 flex items-center gap-3">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-xs text-[#94A3B8] font-mono uppercase tracking-widest">
+            Or
           </span>
-          <div className="flex-1 h-px bg-white/8" />
+          <div className="flex-1 h-px bg-white/10" />
         </div>
 
-        {/* Social placeholder */}
+        {/* Google OAuth Button */}
         <button
           type="button"
-          className="w-full h-11 rounded-full border border-white/10 text-white text-sm font-medium
-                     hover:border-white/25 hover:bg-white/[0.04] transition-all duration-200 flex items-center justify-center gap-3"
+          onClick={handleStartGoogleAuth}
+          className="w-full h-10 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10 font-body font-semibold text-xs text-white tracking-wider uppercase
+                     transition-all duration-300 flex items-center justify-center gap-2"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path
-              fill="#EA4335"
-              d="M5.27 9.77A7.5 7.5 0 0 1 12 4.5c1.7 0 3.25.59 4.47 1.55L19.9 2.6A12 12 0 0 0 0 12c0 1.94.47 3.77 1.3 5.38l4-3.11a7.5 7.5 0 0 1-.03-4.5Z"
-            />
-            <path
-              fill="#FBBC05"
-              d="M12 22.5a12 12 0 0 0 8.32-3.31l-4.06-3.15A7.5 7.5 0 0 1 5.27 14.2l-4 3.11A12 12 0 0 0 12 22.5Z"
-            />
-            <path
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
               fill="#4285F4"
-              d="M20.32 19.19A11.96 11.96 0 0 0 24 12c0-.78-.07-1.54-.21-2.25H12v4.5h6.73a5.75 5.75 0 0 1-2.47 3.79l4.06 3.15Z"
             />
             <path
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
               fill="#34A853"
-              d="M5.27 14.23a7.5 7.5 0 0 1 0-4.46l-4-3.1A12 12 0 0 0 0 12c0 1.94.47 3.77 1.3 5.38l3.97-3.15Z"
+            />
+            <path
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              fill="#FBBC05"
+            />
+            <path
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              fill="#EA4335"
             />
           </svg>
-          Continue with Google
+          Sign in with Google
         </button>
+
+        {/* Terms */}
+        <p className="mt-2 text-center text-xs text-[#94A3B8]/70 leading-relaxed">
+          By signing in you agree to our{" "}
+          <a
+            href="#"
+            className="text-[#F7931A]/80 hover:text-[#F7931A] transition-colors"
+          >
+            Terms
+          </a>{" "}
+          &amp;{" "}
+          <a
+            href="#"
+            className="text-[#F7931A]/80 hover:text-[#F7931A] transition-colors"
+          >
+            Privacy Policy
+          </a>
+          .
+        </p>
       </form>
     </AuthLayout>
   );
