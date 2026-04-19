@@ -280,6 +280,13 @@ export const loginController = async (req, res) => {
       sameSite: "strict",
     });
 
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: "strict",
+      maxAge: 1000 * 60 * 15, // short-lived (15 min)
+    });
+
     return res.status(200).json({
       message: "User logged in successfully!",
       accessToken,
@@ -576,7 +583,7 @@ export const googleAuthCallbackController = async (req, res) => {
       maxAge: 1000 * 60 * 15, // short-lived (15 min)
     });
 
-    return res.redirect(`${config.BASE_URL}:${config.FRONTEND_PORT}`)
+    return res.redirect(`${config.BASE_URL}:${config.FRONTEND_PORT}`);
   } catch (error) {
     console.log("Oauth authentication failed:", error);
     return res
