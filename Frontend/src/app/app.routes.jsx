@@ -4,6 +4,7 @@ import Register from "../features/auth/pages/Register";
 import ForgotPassword from "../features/auth/pages/ForgotPassword";
 import ResetPassword from "../features/auth/pages/ResetPassword";
 import EmailVerification from "../features/auth/pages/EmailVerification";
+import CreateProduct from "../features/vendors/pages/CreateProduct";
 
 export const router = createBrowserRouter([
   {
@@ -25,6 +26,10 @@ export const router = createBrowserRouter([
   {
     path: "/reset-password",
     element: <ResetPassword />,
+  },
+  {
+    path: "/create-product",
+    element: <CreateProduct />,
   },
   {
     path: "/",

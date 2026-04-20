@@ -1,0 +1,73 @@
+/* ─── Product Form Styles ────────────────────────────────────────────── */
+
+/* Smooth transitions for form elements */
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+  transition: all 0.3s ease;
+}
+
+/* Focus states with glow */
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+  box-shadow: 0 10px 20px -10px rgba(247, 147, 26, 0.3);
+}
+
+select:focus {
+  box-shadow: 0 10px 20px -10px rgba(247, 147, 26, 0.2);
+}
+
+/* Placeholder styling */
+::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Custom scrollbar for textarea */
+textarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+textarea::-webkit-scrollbar-track {
+  background: rgba(15, 17, 21, 0.5);
+  border-radius: 999px;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background: #f7931a;
+  border-radius: 999px;
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+  background: #ea580c;
+}
+
+/* Loading spinner animation */
+@keyframes spin-loader {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Image container hover effect */
+.group img {
+  transition: transform 0.3s ease;
+}
+
+.group:hover img {
+  transform: scale(1.05);
+}
+
+/* Select dropdown arrow color */
+select {
+  color-scheme: dark;
+}
+
+select option {
+  background-color: #0f1115;
+  color: white;
+}
