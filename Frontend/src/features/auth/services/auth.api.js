@@ -2,7 +2,7 @@ import axios from "axios";
 import { config } from "../../../config/config";
 
 const authApiInstance = axios.create({
-  baseURL: `${config.BASE_URL}:${config.BACKEND_PORT}/api/auth`,
+  baseURL: `/api/auth`,
   withCredentials: true,
 });
 

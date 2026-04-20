@@ -6,7 +6,6 @@ import {
   resetPassword,
 } from "../services/auth.api";
 import { useDispatch } from "react-redux";
-import { config } from "../../../config/config";
 
 export function useAuth() {
   const dispatch = useDispatch();
@@ -24,7 +23,7 @@ export function useAuth() {
   }
 
   async function handleStartGoogleAuth() {
-    const googleAuthStartUrl = `${config.BASE_URL}:${config.BACKEND_PORT}/api/auth/google`;
+    const googleAuthStartUrl = `/api/auth/google`;
     window.location.href = googleAuthStartUrl;
   }
 
