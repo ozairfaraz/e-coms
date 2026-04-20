@@ -42,3 +42,28 @@ export const createProductController = async (req, res) => {
     product,
   });
 };
+
+export const getAllProductController = async (req, res) => {
+  try {
+    const vendor = req.user;
+
+    if (!vendor) return res.status(404).json({ message: "Vendor not found" });
+
+    const vendorId = vendor._id;
+
+    const products = await productModel.find({ vendor: vendorId });
+
+    if (!products)
+      return res.status(404).json({ message: " No products found" });
+
+    return res.status(200).json({
+      message: "All products fetched successfully",
+      products,
+      success: true,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "fetching products failed", error: error.message });
+  }
+};
