@@ -1,5 +1,10 @@
 import { setUser, setError, setLoading } from "../state/auth.slice";
-import { register, login } from "../services/auth.api";
+import {
+  register,
+  login,
+  forgotPassword,
+  resetPassword,
+} from "../services/auth.api";
 import { useDispatch } from "react-redux";
 import { config } from "../../../config/config";
 
@@ -18,10 +23,48 @@ export function useAuth() {
     dispatch(setUser(data.user));
   }
 
-  async function handleStartGoogleAuth (){
-    const googleAuthStartUrl = `${config.BASE_URL}:${config.BACKEND_PORT}/api/auth/google`
+  async function handleStartGoogleAuth() {
+    const googleAuthStartUrl = `${config.BASE_URL}:${config.BACKEND_PORT}/api/auth/google`;
     window.location.href = googleAuthStartUrl;
   }
 
-  return { handleRegister, handleLogin, handleStartGoogleAuth };
+  async function handleForgotPassword({ email }) {
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+      const data = await forgotPassword({ email });
+      console.log("Forgot password response:", data);
+      return data;
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      dispatch(setError(error.response?.data?.message || error.message));
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
+  async function handleResetPassword({ token, password }) {
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+      const data = await resetPassword({ token, password });
+      console.log("Reset password response:", data);
+      return data;
+    } catch (error) {
+      console.error("Reset password error:", error);
+      dispatch(setError(error.response?.data?.message || error.message));
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
+  return {
+    handleRegister,
+    handleLogin,
+    handleStartGoogleAuth,
+    handleForgotPassword,
+    handleResetPassword,
+  };
 }

@@ -394,7 +394,7 @@ export const refreshTokenController = async (req, res) => {
 /**
  * @route POST /api/auth/logout
  * @description to logout user
- * @access public 
+ * @access public
  */
 export const logoutController = async (req, res) => {
   try {
@@ -416,6 +416,7 @@ export const forgotPasswordController = async (req, res) => {
   const { email } = req.body;
 
   try {
+
     if (!email) return res.status(400).json({ message: "email is required" });
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -436,7 +437,7 @@ export const forgotPasswordController = async (req, res) => {
 
     await user.save();
 
-    const resetUrl = `${appUrl()}/api/auth/reset-password?token=${rawToken}`;
+    const resetUrl = `${appUrl()}/reset-password?token=${rawToken}`;
 
     const sendMailResponse = await sendMailHandler({
       to: user.email,
@@ -467,7 +468,6 @@ export const forgotPasswordController = async (req, res) => {
       mailResponse: sendMailResponse.info.response,
     });
   } catch (error) {
-    console.log("Forgot password failed: ", error);
 
     return res
       .status(500)

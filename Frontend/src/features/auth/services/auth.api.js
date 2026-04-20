@@ -30,9 +30,24 @@ export async function verifyEmail(token) {
   return response.data;
 }
 
-export async function resendVerificationEmail(email) {
+export async function resendVerificationEmail({ email }) {
   const response = await authApiInstance.post("/resend-verification", {
     email,
+  });
+  return response.data;
+}
+
+export async function forgotPassword({ email }) {
+  const response = await authApiInstance.post("/forgot-password", {
+    email,
+  });
+  return response.data;
+}
+
+export async function resetPassword({ token, password }) {
+  const response = await authApiInstance.post("/reset-password", {
+    token,
+    password,
   });
   return response.data;
 }

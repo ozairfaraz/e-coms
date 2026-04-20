@@ -28,22 +28,22 @@ transporter
   });
 
 // Function to send email
-export const sendMailHandler = async ({to, subject, text, html}) => {
+export const sendMailHandler = async ({ to, subject, text, html }) => {
   try {
     const mailOptions = {
-    from: config.GOOGLE_USER,
-    to,
-    subject,
-    text,
-    html,
-  };
+      from: config.GOOGLE_USER,
+      to,
+      subject,
+      text,
+      html,
+    };
 
-  const info = await transporter.sendMail(mailOptions);
-  console.log("Email sent: " + info.envelope);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent: " + info.envelope);
 
-   return { success: true, info };
+    return { success: true, info };
   } catch (error) {
-    return { success: false, error };
+    console.error("Mail sending error:", error.message);
+    return { success: false, info: { response: error.message } };
   }
-  
 };
