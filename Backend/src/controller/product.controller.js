@@ -1,0 +1,44 @@
+import { uploadFile } from "../services/storage.service.js";
+import productModel from "../models/product.model.js";
+
+export const createProductController = async (req, res) => {
+  const { title, description, priceAmount, priceCurrency = "INR" } = req.body;
+  const vendor = req.user;
+
+  if (!vendor) return res.status(404).json({ message: "Vendor not found" });
+
+  if (!title || !description || !priceAmount)
+    return res.status(400).json({
+      message:
+        "Invalid request title, description and priceAmount are mandatory fields",
+    });
+
+  const images = await Promise.all(
+    req.files.map(async (file) => {
+      return await uploadFile({
+        buffer: file.buffer,
+        fileName: file.originalname,
+      });
+    }),
+  );
+
+  if (!images)
+    return res.status(500).json({ messages: "images upload not successfull" });
+
+  const product = await productModel.create({
+    title,
+    description,
+    price: {
+      amount: priceAmount,
+      currency: priceCurrency || "INR",
+    },
+    images,
+    vendor: vendor._id,
+  });
+
+  res.status(201).json({
+    message: "Product created successfully",
+    success: true,
+    product,
+  });
+};

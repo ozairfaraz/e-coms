@@ -1,15 +1,13 @@
-import userModel from "../models/user.model";
-import { verifyAccessToken } from "../utils/auth.utils";
+import userModel from "../models/user.model.js";
+import { verifyAccessToken } from "../utils/auth.utils.js";
 
-const authenticateVendor = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
+export const authenticateVendor = async (req, res, next) => {
+  const accessToken = req.cookies.accessToken;
 
-  if (!authHeader || !authHeader.startsWith("Bearer "))
+  if ( !accessToken)
     return res
       .status(400)
-      .json({ message: "accessToken not found in the header" });
-
-  const accessToken = authHeader.split(" ")[1];
+      .json({ message: "accessToken not found in the cookies" });
 
   try {
     const decoded = verifyAccessToken(accessToken);

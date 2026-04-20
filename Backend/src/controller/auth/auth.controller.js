@@ -27,6 +27,11 @@ function getGoogleClient() {
   });
 }
 
+/**
+ * @route POST /api/auth/registere
+ * @description to register users
+ * @access public
+ */
 export const registerController = async (req, res) => {
   const { email, password, fullName } = req.body;
 
@@ -113,6 +118,11 @@ export const registerController = async (req, res) => {
   }
 };
 
+/**
+ * @route GET /api/auth/verify-email
+ * @description checks query token in url to verify email
+ * @access public (Token Protected)
+ */
 export const verifyEmailController = async (req, res) => {
   const token = req.query.token;
 
@@ -164,6 +174,11 @@ export const verifyEmailController = async (req, res) => {
   }
 };
 
+/**
+ * @route POST /api/auth/resend-verification
+ * @description resends the verification email during registration
+ * @access public
+ */
 export const resendVerificationEmailController = async (req, res) => {
   const { email } = req.body;
 
@@ -235,6 +250,11 @@ export const resendVerificationEmailController = async (req, res) => {
   }
 };
 
+/**
+ * @route POST /api/auth/login
+ * @description to login user
+ * @access public
+ */
 export const loginController = async (req, res) => {
   const { email, password } = req.body;
 
@@ -309,6 +329,11 @@ export const loginController = async (req, res) => {
   }
 };
 
+/**
+ * @route POST /api/auth/refresh
+ * @description to refresh the refresh token and access token
+ * @access public (Token Protected)
+ */
 export const refreshTokenController = async (req, res) => {
   try {
     const refreshToken = req.cookies?.refreshToken;
@@ -366,6 +391,11 @@ export const refreshTokenController = async (req, res) => {
   }
 };
 
+/**
+ * @route POST /api/auth/logout
+ * @description to logout user
+ * @access public 
+ */
 export const logoutController = async (req, res) => {
   try {
     res.clearCookie("refreshToken", { path: "/" });
@@ -377,6 +407,11 @@ export const logoutController = async (req, res) => {
   }
 };
 
+/**
+ * @route POST /api/auth/forgot-password
+ * @description sends a forgot password email to reset password
+ * @access public
+ */
 export const forgotPasswordController = async (req, res) => {
   const { email } = req.body;
 
@@ -440,6 +475,11 @@ export const forgotPasswordController = async (req, res) => {
   }
 };
 
+/**
+ * @route POST /api/auth/reset-password
+ * @description resets the users password
+ * @access public (Token Protected)
+ */
 export const resetPasswordController = async (req, res) => {
   const { token, password } = req.body;
 
@@ -481,6 +521,11 @@ export const resetPasswordController = async (req, res) => {
   }
 };
 
+/**
+ * @route GET /api/auth/google
+ * @description Redirect user to Google for authentication
+ * @access public (OAuth)
+ */
 export const googleAuthStartController = async (req, res) => {
   try {
     const client = getGoogleClient();
@@ -500,6 +545,11 @@ export const googleAuthStartController = async (req, res) => {
   }
 };
 
+/**
+ * @route GET /api/auth/google/callback
+ * @description handles google OAuth callback authentication
+ * @access public (OAuth)
+ */
 export const googleAuthCallbackController = async (req, res) => {
   const code = req.query.code;
 

@@ -1,6 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth.route.js";
+import productRouter from "./routes/products.routes.js";
 import cors from "cors";
 import { config } from "./config/config.js";
 
@@ -19,6 +20,9 @@ app.use(
 app.get("/health", (req, res) => {
   res.send("Server is healthy");
 });
+
 app.use("/api/auth", authRouter);
+
+app.use("/api/products", productRouter);
 
 export default app;

@@ -19,4 +19,5 @@ export const config = {
   JWT_SECRET: requireEnv("JWT_SECRET"),
   BASE_URL: requireEnv("BASE_URL"),
   FRONTEND_PORT: requireEnv("FRONTEND_PORT"),
+  IMAGEKIT_PRIVATE_KEY: requireEnv("IMAGEKIT_PRIVATE_KEY"),
 };
