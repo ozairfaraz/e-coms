@@ -4,6 +4,7 @@ import {
   login,
   forgotPassword,
   resetPassword,
+  getMe,
 } from "../services/auth.api";
 import { useDispatch } from "react-redux";
 
@@ -12,14 +13,14 @@ export function useAuth() {
 
   async function handleRegister({ email, password, fullname }) {
     const data = await register({ email, password, fullname });
-
     dispatch(setUser(data.user));
+    return data.user;
   }
 
   async function handleLogin({ email, password }) {
     const data = await login({ email, password });
-
     dispatch(setUser(data.user));
+    return data.user;
   }
 
   async function handleStartGoogleAuth() {
@@ -59,11 +60,25 @@ export function useAuth() {
     }
   }
 
+  async function handleGetMe() {
+    try {
+      dispatch(setLoading(true));
+      const data = await getMe();
+      dispatch(setUser(data.user));
+    } catch (error) {
+      dispatch(setError(error.response?.data?.message || error.message));
+      console.log(error.response?.data?.message || error.message);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
   return {
     handleRegister,
     handleLogin,
     handleStartGoogleAuth,
     handleForgotPassword,
     handleResetPassword,
+    handleGetMe,
   };
 }

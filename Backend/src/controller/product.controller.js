@@ -1,6 +1,11 @@
 import { uploadFile } from "../services/storage.service.js";
 import productModel from "../models/product.model.js";
 
+/**
+ * @route POST /api/products
+ * @description to create products
+ * @access private (vendor only)
+ */
 export const createProductController = async (req, res) => {
   const { title, description, priceAmount, priceCurrency = "INR" } = req.body;
   const vendor = req.user;
@@ -43,7 +48,12 @@ export const createProductController = async (req, res) => {
   });
 };
 
-export const getAllProductController = async (req, res) => {
+/**
+ * @route GET /api/products/allProducts
+ * @description returns all products of the vendor
+ * @access private (vendor only)
+ */
+export const getAllVendorProductController = async (req, res) => {
   try {
     const vendor = req.user;
 
@@ -66,4 +76,17 @@ export const getAllProductController = async (req, res) => {
       .status(500)
       .json({ message: "fetching products failed", error: error.message });
   }
+};
+
+/**
+ * @route GET /api/auth/
+ * @description returs all products
+ * @access public
+ */
+export const getAllProductsController = async (req, res) => {
+  const products = await productModel.find();
+
+  return res
+    .status(200)
+    .json({ message: "all products fetched successfully", products });
 };

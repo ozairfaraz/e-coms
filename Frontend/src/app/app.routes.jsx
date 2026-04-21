@@ -6,6 +6,8 @@ import ResetPassword from "../features/auth/pages/ResetPassword";
 import EmailVerification from "../features/auth/pages/EmailVerification";
 import CreateProduct from "../features/vendors/pages/CreateProduct";
 import VendorDashboard from "../features/vendors/pages/VendorDashboard";
+import Protected from "../features/auth/components/Protected";
+import Home from "../features/vendors/pages/Home";
 
 export const router = createBrowserRouter([
   {
@@ -33,16 +35,24 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/vendor/create-product",
-        element: <CreateProduct />,
+        element: (
+          <Protected>
+            <CreateProduct />
+          </Protected>
+        ),
       },
       {
         path: "/vendor/dashboard",
-        element: <VendorDashboard />
+        element: (
+          <Protected>
+            <VendorDashboard />
+          </Protected>
+        ),
       },
     ],
   },
   {
     path: "/",
-    element: <Login />, // default redirect until home page is built
+    element: <Home />,
   },
 ]);

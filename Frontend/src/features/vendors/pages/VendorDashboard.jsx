@@ -11,14 +11,14 @@ import {
 } from "lucide-react";
 
 const VendorDashboard = () => {
-  const { handleGetAllProducts } = useProduct();
+  const { handleGetAllVendorProducts } = useProduct();
   const vendorProducts = useSelector((state) => state.product.vendorProducts);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    handleGetAllProducts();
-  }, [handleGetAllProducts]);
+    handleGetAllVendorProducts();
+  }, []);
 
   const handleNextImage = () => {
     if (selectedProduct && selectedProduct.images) {

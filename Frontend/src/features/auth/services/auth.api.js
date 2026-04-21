@@ -51,3 +51,8 @@ export async function resetPassword({ token, password }) {
   });
   return response.data;
 }
+
+export async function getMe() {
+  const response = await authApiInstance.get("/get-me");
+  return response.data;
+}

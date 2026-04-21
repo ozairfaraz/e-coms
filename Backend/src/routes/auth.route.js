@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   forgotPasswordController,
+  getMeController,
   googleAuthCallbackController,
   googleAuthStartController,
   loginController,
@@ -11,6 +12,7 @@ import {
   resetPasswordController,
   verifyEmailController,
 } from "../controller/auth/auth.controller.js";
+import { authenticateUser } from "../middleware/auth.middleware.js";
 
 const authRouter = Router();
 
@@ -24,5 +26,6 @@ authRouter.post("/forgot-password", forgotPasswordController);
 authRouter.post("/reset-password", resetPasswordController);
 authRouter.get("/google", googleAuthStartController);
 authRouter.get("/google/callback", googleAuthCallbackController);
+authRouter.get("/get-me", authenticateUser, getMeController);
 
 export default authRouter;

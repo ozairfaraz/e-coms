@@ -370,6 +370,13 @@ export const refreshTokenController = async (req, res) => {
       sameSite: "strict",
     });
 
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: "strict",
+      maxAge: 1000 * 60 * 15, // short-lived (15 min)
+    });
+
     return res.status(200).json({
       message: "Tokens refreshed successfully!",
       accessToken: newAccessToken,
@@ -416,7 +423,6 @@ export const forgotPasswordController = async (req, res) => {
   const { email } = req.body;
 
   try {
-
     if (!email) return res.status(400).json({ message: "email is required" });
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -468,7 +474,6 @@ export const forgotPasswordController = async (req, res) => {
       mailResponse: sendMailResponse.info.response,
     });
   } catch (error) {
-
     return res
       .status(500)
       .json({ message: "Forgot password failed: ", error: error.message });
@@ -640,4 +645,19 @@ export const googleAuthCallbackController = async (req, res) => {
       .status(500)
       .json({ message: "Oauth authentication failed", error: error.message });
   }
+};
+
+/**
+ * @route GET /api/auth/get-me
+ * @description return user info
+ * @access public (token protected)
+ */
+export const getMeController = async (req, res) => {
+  const user = req.user;
+
+  res.status(200).json({
+    message: "User fetched successfully",
+    success: true,
+    user,
+  });
 };

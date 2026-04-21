@@ -4,7 +4,7 @@ import AuthLayout from "../components/AuthLayout";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Login() {
-  const { handleLogin,handleStartGoogleAuth } = useAuth();
+  const { handleLogin, handleStartGoogleAuth } = useAuth();
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -17,13 +17,14 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // TODO: dispatch login thunk
-    await handleLogin({
+    const user = await handleLogin({
       email: formData.email,
       password: formData.password,
     });
-    console.log("Login payload:", formData);
-    console.log("logged in broskiiii");
-    navigate("/");
+    console.log("User object:", user);
+    console.log("User role:", user?.role);
+    if (user?.role === "vendor") navigate("/vendor/dashboard");
+    else if (user?.role === "user") navigate("/");
   };
 
   const inputClass = (name) =>
