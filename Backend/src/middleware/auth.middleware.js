@@ -5,7 +5,7 @@ export const authenticateUser = async (req, res, next) => {
   const accessToken = req.cookies.accessToken;
 
   if (!accessToken)
-    return res.status(400).json({ message: "Access token not found" });
+    return res.status(401).json({ message: "Access token not found" });
 
   try {
     const decoded = verifyAccessToken(accessToken);
@@ -41,7 +41,7 @@ export const authenticateVendor = async (req, res, next) => {
 
   if (!accessToken)
     return res
-      .status(400)
+      .status(401)
       .json({ message: "accessToken not found in the cookies" });
 
   try {

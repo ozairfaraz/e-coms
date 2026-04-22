@@ -339,7 +339,7 @@ export const refreshTokenController = async (req, res) => {
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken)
-      return res.status(404).json({ message: "Refresh token missing" });
+      return res.status(401).json({ message: "Refresh token missing" });
 
     const decoded = verifyRefreshToken(refreshToken);
 
@@ -370,7 +370,7 @@ export const refreshTokenController = async (req, res) => {
       sameSite: "strict",
     });
 
-    res.cookie("accessToken", accessToken, {
+    res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: isProd,
       sameSite: "strict",
@@ -385,7 +385,7 @@ export const refreshTokenController = async (req, res) => {
     console.error("Error in logging in: ", error);
     if (error.name === "TokenExpiredError") {
       return res
-        .status(400)
+        .status(401)
         .json({ message: "Verification token has expired" });
     }
     if (error.name === "JsonWebTokenError") {
@@ -653,11 +653,15 @@ export const googleAuthCallbackController = async (req, res) => {
  * @access public (token protected)
  */
 export const getMeController = async (req, res) => {
-  const user = req.user;
+  try {
+    const user = req.user;
 
-  res.status(200).json({
-    message: "User fetched successfully",
-    success: true,
-    user,
-  });
+    res.status(200).json({
+      message: "User fetched successfully",
+      success: true,
+      user,
+    });
+  } catch (error) {
+    res.status(401).json({ message: "Access token not found" });
+  }
 };

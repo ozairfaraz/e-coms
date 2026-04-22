@@ -1,51 +1,45 @@
-import axios from "axios";
-import { config } from "../../../config/config";
-
-const authApiInstance = axios.create({
-  baseURL: `/api/auth`,
-  withCredentials: true,
-});
+import apiInstance from "../../../config/api";
 
 export async function register({ email, password, fullname }) {
-  const responce = await authApiInstance.post("/register", {
+  const response = await apiInstance.post("/auth/register", {
     email,
     password,
     fullName: fullname,
   });
-  return responce.data;
+  return response.data;
 }
 
 export async function login({ email, password }) {
-  const responce = await authApiInstance.post("/login", {
+  const response = await apiInstance.post("/auth/login", {
     email,
     password,
   });
-  return responce.data;
+  return response.data;
 }
 
 export async function verifyEmail(token) {
-  const response = await authApiInstance.get("/verify-email", {
+  const response = await apiInstance.get("/auth/verify-email", {
     params: { token },
   });
   return response.data;
 }
 
 export async function resendVerificationEmail({ email }) {
-  const response = await authApiInstance.post("/resend-verification", {
+  const response = await apiInstance.post("/auth/resend-verification", {
     email,
   });
   return response.data;
 }
 
 export async function forgotPassword({ email }) {
-  const response = await authApiInstance.post("/forgot-password", {
+  const response = await apiInstance.post("/auth/forgot-password", {
     email,
   });
   return response.data;
 }
 
 export async function resetPassword({ token, password }) {
-  const response = await authApiInstance.post("/reset-password", {
+  const response = await apiInstance.post("/auth/reset-password", {
     token,
     password,
   });
@@ -53,6 +47,17 @@ export async function resetPassword({ token, password }) {
 }
 
 export async function getMe() {
-  const response = await authApiInstance.get("/get-me");
+  const response = await apiInstance.get("/auth/get-me");
+  return response.data;
+}
+
+export async function refreshAccessToken() {
+  const response = await apiInstance.post(
+    "/auth/refresh",
+    {},
+    {
+      withCredentials: true,
+    },
+  );
   return response.data;
 }

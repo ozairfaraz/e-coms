@@ -1,21 +1,16 @@
-import axios from "axios";
-
-const productApiInstance = axios.create({
-  baseURL: "/api/products",
-  withCredentials: true,
-});
+import apiInstance from "../../../config/api";
 
 export const getAllVendorProducts = async () => {
-  const response = await productApiInstance.get("/allProducts");
+  const response = await apiInstance.get("/products/allProducts");
   return response.data;
 };
 
 export const createProduct = async (formData) => {
-  const response = await productApiInstance.post("/", formData);
+  const response = await apiInstance.post("/products", formData);
   return response.data;
 };
 
 export const getAllProducts = async () => {
-  const response = await productApiInstance.get("/");
+  const response = await apiInstance.get("/products");
   return response.data;
 };
