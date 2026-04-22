@@ -1,4 +1,4 @@
-import apiInstance from "../../../config/api";
+import apiInstance from "../../../api/client";
 
 export const getAllVendorProducts = async () => {
   const response = await apiInstance.get("/products/allProducts");

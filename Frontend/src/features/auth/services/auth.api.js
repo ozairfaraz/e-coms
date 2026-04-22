@@ -1,4 +1,4 @@
-import apiInstance from "../../../config/api";
+import apiInstance from "../../../api/client";
 
 export async function register({ email, password, fullname }) {
   const response = await apiInstance.post("/auth/register", {
