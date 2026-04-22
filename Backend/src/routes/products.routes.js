@@ -9,6 +9,7 @@ import {
   createProductController,
   getAllProductsController,
   getAllVendorProductController,
+  getProductDetailsController
 } from "../controller/product.controller.js";
 
 const productRouter = express.Router();
@@ -28,5 +29,7 @@ productRouter.get(
 );
 
 productRouter.get("/", authenticateUser, getAllProductsController);
+
+productRouter.get("/details/:id",getProductDetailsController)
 
 export default productRouter;

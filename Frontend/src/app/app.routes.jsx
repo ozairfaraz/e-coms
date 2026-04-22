@@ -8,8 +8,13 @@ import CreateProduct from "../features/vendors/pages/CreateProduct";
 import VendorDashboard from "../features/vendors/pages/VendorDashboard";
 import Protected from "../features/auth/components/Protected";
 import Home from "../features/vendors/pages/Home";
+import ProductDetails from "../features/vendors/pages/ProductDetails";
 
 export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Home />,
+  },
   {
     path: "/login",
     element: <Login />,
@@ -52,7 +57,7 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: "/",
-    element: <Home />,
-  },
+    path: "/product/:productId",
+    element: <ProductDetails />
+  }
 ]);

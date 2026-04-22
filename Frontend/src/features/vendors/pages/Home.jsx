@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useProduct } from "../hook/useProduct";
 import { useSelector } from "react-redux";
 import { Search, ShoppingBag, Package, User } from "lucide-react";
+import { useNavigate } from "react-router";
 
 const Home = () => {
   const { handleGetAllProducts } = useProduct();
@@ -9,6 +10,7 @@ const Home = () => {
   const user = useSelector((state) => state.auth.user);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     handleGetAllProducts();
@@ -97,6 +99,9 @@ const Home = () => {
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
               {filteredProducts.map((product) => (
                 <div
+                  onClick={() => {
+                    navigate(`/product/${product._id}`);
+                  }}
                   key={product._id}
                   className="group bg-[#0F1115] border border-white/10 rounded-xl overflow-hidden hover:border-[#F7931A]/50 hover:shadow-[0_0_20px_-5px_rgba(247,147,26,0.3)] transition-all duration-300 cursor-pointer h-full flex flex-col"
                 >
